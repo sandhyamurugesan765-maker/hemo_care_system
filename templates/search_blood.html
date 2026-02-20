@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Search Blood{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Search Blood Donors</h1>
+    
+    <form method="POST" action="{{ url_for('search_blood') }}" class="search-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Blood Group *</label>
+                <select name="blood_group" class="form-control" required>
+                    <option value="">Select Blood Group</option>
+                    <option value="A+" {% if blood_group == 'A+' %}selected{% endif %}>A+</option>
+                    <option value="A-" {% if blood_group == 'A-' %}selected{% endif %}>A-</option>
+                    <option value="B+" {% if blood_group == 'B+' %}selected{% endif %}>B+</option>
+                    <option value="B-" {% if blood_group == 'B-' %}selected{% endif %}>B-</option>
+                    <option value="O+" {% if blood_group == 'O+' %}selected{% endif %}>O+</option>
+                    <option value="O-" {% if blood_group == 'O-' %}selected{% endif %}>O-</option>
+                    <option value="AB+" {% if blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                    <option value="AB-" {% if blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>City (Optional)</label>
+                <input type="text" name="city" class="form-control" value="{{ request.args.get('city', '') }}">
+            </div>
+            
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </div>
+    </form>
+    
+    {% if blood_group %}
+        {% if donors %}
+            <!-- Results Header with Export Buttons -->
+            <div class="results-summary">
+                <div class="results-count">
+                    <strong>{{ donors|length }}</strong> Donors Found for {{ blood_group }}
+                    {% if request.args.get('city') %}
+                        in {{ request.args.get('city') }}
+                    {% endif %}
+                </div>
+                
+                <div class="results-actions">
+                    <!-- Export Dropdown -->
+                   <button class="btn btn-export btn-csv" onclick="window.print()">
+                       <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Donor Table -->
+            <div class="table-container" id="donorTable">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Donor ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Blood Group</th>
+                            <th>City</th>
+                            <th>Phone</th>
+                            <th>Last Donation</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for donor in donors %}
+                        <tr>
+                            <td>{{ donor.donor_id }}</td>
+                            <td>{{ donor.name }}</td>
+                            <td>{{ donor.age }}</td>
+                            <td>{{ donor.gender }}</td>
+                            <td><strong>{{ donor.blood_group }}</strong></td>
+                            <td>{{ donor.city }}</td>
+                            <td>{{ donor.phone }}</td>
+                            <td>{{ donor.last_donation_date or 'Never' }}</td>
+                            <td>
+                                <a href="{{ url_for('donor_detail', donor_id=donor.donor_id) }}" class="btn" style="padding: 5px 10px; background: #ffffff; color: rgb(143, 143, 143);">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <script>
+                
+                
+                // Handle Copy to Clipboard - FIXED: removed event parameter
+                function handleCopyExport() {
+                    // Find the clicked element
+                    const buttons = document.querySelectorAll('.export-dropdown-item.copy');
+                    let button = null;
+                    
+                    buttons.forEach(btn => {
+                        if (btn === event?.target || btn.contains(event?.target)) {
+                            button = btn;
+                        }
+                    });
+                    
+                    if (!button) button = document.querySelector('.export-dropdown-item.copy');
+                    
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<span class="download-spinner"></span> Copying...';
+                    
+                    const headers = ['Donor ID', 'Name', 'Age', 'Gender', 'Blood Group', 'City', 'Phone', 'Email', 'Last Donation', 'Eligible'];
+                    
+                    setTimeout(() => {
+                        if (typeof copyToClipboard === 'function') {
+                            copyToClipboard(exportData, headers);
+                        } else {
+                            // Fallback copy
+                            let text = headers.join('\t') + '\n';
+                            exportData.forEach(row => {
+                                text += Object.values(row).join('\t') + '\n';
+                            });
+                            navigator.clipboard.writeText(text).then(() => {
+                                alert('Data copied to clipboard!');
+                            });
+                        }
+                        button.innerHTML = originalText;
+                    }, 100);
+                }
+            </script>
+            
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                No eligible donors found for blood group {{ blood_group }}
+                {% if request.args.get('city') %}
+                    in {{ request.args.get('city') }}
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

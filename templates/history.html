@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Donation History{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Donation History</h1>
+    
+    <!-- Search Form -->
+    <form method="GET" action="{{ url_for('history') }}" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <div style="display: flex; gap: 15px; align-items: end; flex-wrap: wrap;">
+            <div style="flex: 2; min-width: 250px;">
+                <label>Search by Donor ID</label>
+                <input type="text" name="donor_id" class="form-control" value="{{ request.args.get('donor_id', '') }}" placeholder="Enter Donor ID">
+            </div>
+            
+            <div style="flex: 1; min-width: 250px;">
+                <label>Blood Group</label>
+                <select name="blood_group" class="form-control">
+                    <option value="">All Blood Groups</option>
+                    <option value="A+" {% if request.args.get('blood_group') == 'A+' %}selected{% endif %}>A+</option>
+                    <option value="A-" {% if request.args.get('blood_group') == 'A-' %}selected{% endif %}>A-</option>
+                    <option value="B+" {% if request.args.get('blood_group') == 'B+' %}selected{% endif %}>B+</option>
+                    <option value="B-" {% if request.args.get('blood_group') == 'B-' %}selected{% endif %}>B-</option>
+                    <option value="O+" {% if request.args.get('blood_group') == 'O+' %}selected{% endif %}>O+</option>
+                    <option value="O-" {% if request.args.get('blood_group') == 'O-' %}selected{% endif %}>O-</option>
+                    <option value="AB+" {% if request.args.get('blood_group') == 'AB+' %}selected{% endif %}>AB+</option>
+                    <option value="AB-" {% if request.args.get('blood_group') == 'AB-' %}selected{% endif %}>AB-</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <a href="{{ url_for('history') }}" class="btn" style="background: #757575; color: white;">
+                    <i class="fas fa-times"></i> Clear
+                </a>
+            </div>
+        </div>
+    </form>
+    
+    {% if history %}
+    <!-- Results Summary and Export -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <strong>{{ history|length }}</strong> donation records found
+            {% if request.args.get('donor_id') %}
+                for Donor ID: <strong>{{ request.args.get('donor_id') }}</strong>
+            {% endif %}
+            {% if request.args.get('blood_group') %}
+                | Blood Group: <strong>{{ request.args.get('blood_group') }}</strong>
+            {% endif %}
+        </div>
+        
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button onclick="window.print()" class="btn" style="background: #6c757d; color: white; padding: 8px 15px;">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
+    </div>
+    
+    <!-- Donation History Table -->
+    <div class="table-container">
+        <table class="data-table" id="donationTable">
+            <thead>
+                <tr>
+                    <th>Donation ID</th>
+                    <th>Donor ID</th>
+                    <th>Donor Name</th>
+                    <th>Blood Group</th>
+                    <th>Units</th>
+                    <th>Date</th>
+                    <th>Expiry Date</th>
+                    <th>Received By</th>
+                    <th>Test Result</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in history %}
+                <tr>
+                    <td>{{ record.donation_id }}</td>
+                    <td>
+                        <a href="{{ url_for('donor_detail', donor_id=record.donor_id) }}" style="color: #2196f3; text-decoration: none;">
+                            {{ record.donor_id }}
+                        </a>
+                    </td>
+                    <td>{{ record.donor_name }}</td>
+                    <td><strong>{{ record.blood_group }}</strong></td>
+                    <td>{{ record.units_donated }}</td>
+                    <td>{{ record.donation_date }}</td>
+                    <td>{{ record.expiry_date }}</td>
+                    <td>{{ record.received_by or 'N/A' }}</td>
+                    <td>
+                        {% if record.test_result == 'Passed' %}
+                        <span style="color: #2e7d32; font-weight: bold;">✓ Passed</span>
+                        {% elif record.test_result == 'Failed' %}
+                        <span style="color: #c62828; font-weight: bold;">✗ Failed</span>
+                        {% else %}
+                        <span style="color: #ff9800;">⏳ Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <!-- View Donor Button -->
+                        <a href="{{ url_for('donor_detail', donor_id=record.donor_id) }}" 
+                           class="btn" style="background: #ffffff; color:rgb(143, 143, 143); padding: 5px 10px; margin-right: 5px;">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        
+                        <!-- Edit Donor Button -->
+                        {% if session.get('user_role') in ['admin', 'staff'] %}
+                        <a href="{{ url_for('edit_donor', donor_id=record.donor_id) }}" 
+                           class="btn" style="background: #ffffff; color: rgb(143, 143, 143); padding: 5px 10px; margin-right: 5px;">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        {% endif %}
+                        
+                        
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Summary Statistics -->
+    <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <div>
+            <strong>Total Records:</strong> {{ history|length }}
+        </div>
+        <div>
+            <strong>Total Units:</strong> {{ history|sum(attribute='units_donated') }}
+        </div>
+        <div>
+            <strong>Passed Tests:</strong> 
+            {{ history|selectattr('test_result', 'equalto', 'Passed')|list|length }}
+        </div>
+        <div>
+            <strong>Failed Tests:</strong> 
+            {{ history|selectattr('test_result', 'equalto', 'Failed')|list|length }}
+        </div>
+    </div>
+    
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        No donation records found.
+    </div>
+    {% endif %}
+</div>
+
+
+<script>
+
+
+// Add animation styles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideDown {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    #deleteDonorModal {
+        animation: fadeIn 0.3s ease;
+    }
+    
+    #deleteDonorModal > div {
+        animation: slideDown 0.3s ease;
+    }
+`;
+document.head.appendChild(style);
+</script>
+<style>
+    .edit-btn {
+        background: #ffffff;
+        color: rgb(79, 79, 79);
+        padding: 5px 10px;
+        margin-right: 5px;
+        transition: all 0.3s ease;
+        display: inline-block;
+        text-decoration: none;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+    
+    .edit-btn:hover {
+        background: #ff9797;
+        color: #c12727;
+        border-color: #999;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}

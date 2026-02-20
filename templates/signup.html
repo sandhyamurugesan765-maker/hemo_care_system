@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h2>Create Account</h2>
+            <p>Join our blood donation community</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('signup') }}" class="auth-form">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+    <label class="form-label">Password (min. 6 characters)</label>
+    <div class="password-field">
+        <input type="password" name="password" id="signup_password" class="form-control" required minlength="6" placeholder="Create a password">
+        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('signup_password')" tabindex="-1">
+            <i class="fas fa-eye"></i>
+        </button>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="form-label">Confirm Password</label>
+    <div class="password-field">
+        <input type="password" name="confirm_password" id="signup_confirm_password" class="form-control" required placeholder="Confirm your password">
+        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('signup_confirm_password')" tabindex="-1">
+            <i class="fas fa-eye"></i>
+        </button>
+    </div>
+</div>
+            
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButtons = document.querySelectorAll('.password-toggle');
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const passwordInput = this.previousElementSibling;
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

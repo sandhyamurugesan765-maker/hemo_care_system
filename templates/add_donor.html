@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Add Donor{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Add New Donor</h1>
+    <p>Register a new blood donor in the system</p>
+    
+    <form method="POST" action="{{ url_for('add_donor') }}">
+        <div class="form-section">
+            <h3>Personal Information</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Date of Birth *</label>
+                    <input type="date" name="dob" class="form-control" required onchange="calculateAge(this.value)">
+                    <small>Age will be calculated automatically</small>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Gender *</label>
+                    <select name="gender" class="form-control" required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Blood Group *</label>
+                    <select name="blood_group" class="form-control" required>
+                        <option value="">Select Blood Group</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Contact Information</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>City *</label>
+                    <input type="text" name="city" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number *</label>
+                    <input type="tel" name="phone" class="form-control" required pattern="[0-9]{10}">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" class="form-control">
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Medical Information</h3>
+            <div class="form-group">
+                <label>Medical Details</label>
+                <textarea name="medical_details" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Donation (Optional)</h3>
+            <div style="margin-bottom: 15px;">
+                <input type="checkbox" id="make_donation" name="make_donation" value="yes" onchange="toggleDonation()">
+                <label for="make_donation">Record a donation for this donor</label>
+            </div>
+            
+            <div id="donationFields" style="display: none;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Donation Date</label>
+                        <input type="date" name="donation_date" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Units Donated</label>
+                        <select name="units_donated" class="form-control">
+                            <option value="1">1 Unit</option>
+                            <option value="2">2 Units</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Donor</button>
+            <button type="reset" class="btn">Reset</button>
+        </div>
+    </form>
+</div>
+
+<script>
+function calculateAge(dob) {
+    if (!dob) return;
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    alert(`Age: ${age} years\nEligible: ${age >= 18 && age <= 65 ? 'Yes' : 'No'}`);
+}
+
+function toggleDonation() {
+    const fields = document.getElementById('donationFields');
+    const checkbox = document.getElementById('make_donation');
+    fields.style.display = checkbox.checked ? 'block' : 'none';
+}
+</script>
+{% endblock %}

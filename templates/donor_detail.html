@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Donor Details{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Donor Details</h1>
+        <a href="{{ url_for('search_blood', donor_id=donor.donor_id) }}" style="background: #6c757d; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+    <i class="fas fa-arrow-left"></i> Back to Search
+</a>
+    </div>
+    
+    {% if donor %}
+    <!-- Donor Information Card -->
+    <div style="background: white; border-radius: 10px; padding: 25px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #e53935, #c62828); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold;">
+                {{ donor.name[0] }}
+            </div>
+            <div>
+                <h2 style="margin-bottom: 5px;">{{ donor.name }}</h2>
+                <p style="color: #666;">Donor ID: <strong>{{ donor.donor_id }}</strong></p>
+            </div>
+            <div style="margin-left: auto;">
+                {% if donor.eligible %}
+                <span style="background: #2e7d32; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;">
+                    <i class="fas fa-check-circle"></i> Eligible
+                </span>
+                {% else %}
+                <span style="background: #c62828; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;">
+                    <i class="fas fa-times-circle"></i> Not Eligible
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div>
+                <h4 style="color: #666; margin-bottom: 10px;">Personal Information</h4>
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">Age:</td>
+                        <td style="padding: 5px 0;"><strong>{{ donor.age }} years</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">Gender:</td>
+                        <td style="padding: 5px 0;"><strong>{{ donor.gender }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">Blood Group:</td>
+                        <td style="padding: 5px 0;"><strong style="color: #e53935; font-size: 1.2rem;">{{ donor.blood_group }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">Date of Birth:</td>
+                        <td style="padding: 5px 0;"><strong>{{ donor.date_of_birth }}</strong></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div>
+                <h4 style="color: #666; margin-bottom: 10px;">Contact Information</h4>
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">City:</td>
+                        <td style="padding: 5px 0;"><strong>{{ donor.city }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">Phone:</td>
+                        <td style="padding: 5px 0;"><strong>{{ donor.phone }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">Email:</td>
+                        <td style="padding: 5px 0;"><strong>{{ donor.email or 'N/A' }}</strong></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div>
+                <h4 style="color: #666; margin-bottom: 10px;">Medical Information</h4>
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">Last Donation:</td>
+                        <td style="padding: 5px 0;"><strong>{{ donor.last_donation_date or 'Never' }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">Medical Details:</td>
+                        <td style="padding: 5px 0;"><strong>{{ donor.medical_details or 'None' }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">Status:</td>
+                        <td style="padding: 5px 0;"><strong>{{ donor.status or 'Active' }}</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button onclick="window.print()" class="btn" style="background: #c62828; color: white;">
+               <i class="fas fa-print"></i> Print Details
+            </button>
+        </div>
+    </div>
+    
+    <!-- Donation History -->
+    <div style="background: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom: 20px;">Donation History</h3>
+        
+        {% if donations %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Donation ID</th>
+                        <th>Date</th>
+                        <th>Units</th>
+                        <th>Expiry Date</th>
+                        <th>Received By</th>
+                        <th>Test Result</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donation in donations %}
+                    <tr>
+                        <td>{{ donation.donation_id }}</td>
+                        <td>{{ donation.donation_date }}</td>
+                        <td>{{ donation.units_donated }}</td>
+                        <td>{{ donation.expiry_date }}</td>
+                        <td>{{ donation.received_by or 'N/A' }}</td>
+                        <td>
+                            {% if donation.test_result == 'Passed' %}
+                            <span style="color: #2e7d32;">✓ Passed</span>
+                            {% elif donation.test_result == 'Failed' %}
+                            <span style="color: #c62828;">✗ Failed</span>
+                            {% else %}
+                            <span style="color: #ff9800;">⏳ Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ donation.notes or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Summary -->
+        <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+            <p><strong>Total Donations:</strong> {{ donations|length }}</p>
+            <p><strong>Total Units Donated:</strong> 
+                {{ donations|sum(attribute='units_donated') }}
+            </p>
+        </div>
+        
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            No donation history found for this donor.
+        </div>
+        {% endif %}
+    </div>
+    
+    {% else %}
+    <div class="alert alert-error">
+        <i class="fas fa-exclamation-circle"></i>
+        Donor not found.
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    @media print {
+        .btn, .navbar, .footer, .no-print {
+            display: none !important;
+        }
+        body {
+            background: white;
+        }
+        .form-container {
+            box-shadow: none;
+            padding: 0;
+        }
+    }
+</style>
+{% endblock %}

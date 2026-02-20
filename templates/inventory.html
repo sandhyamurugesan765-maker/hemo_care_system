@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Blood Inventory</h1>
+    
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Blood Group</th>
+                    <th>Units Available</th>
+                    <th>Status</th>
+                    <th>Last Updated</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in inventory %}
+                <tr>
+                    <td>{{ item.blood_group }}</td>
+                    <td>{{ item.units_available }}</td>
+                    <td>
+                        {% if item.status == 'Low Stock' %}
+                        <span style="color: #e53935; font-weight: bold;">{{ item.status }}</span>
+                        {% elif item.status == 'Normal' %}
+                        <span style="color: #2e7d32; font-weight: bold;">{{ item.status }}</span>
+                        {% else %}
+                        <span style="color: #1565c0; font-weight: bold;">{{ item.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.last_updated[:10] if item.last_updated else 'N/A' }}</td>
+                    <td>
+                        <button onclick="updateStock('{{ item.blood_group }}', 1, 'add')" style="background: #2e7d32; color: white; padding: 5px 10px; border: none; border-radius: 4px; margin-right: 5px;">+1</button>
+                        <button onclick="updateStock('{{ item.blood_group }}', 1, 'remove')" style="background: #e53935; color: white; padding: 5px 10px; border: none; border-radius: 4px;">-1</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+async function updateStock(bloodGroup, units, action) {
+    if (!confirm(`${action === 'add' ? 'Add' : 'Remove'} ${units} unit of ${bloodGroup}?`)) return;
+    
+    try {
+        const response = await fetch('/api/update_stock', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({blood_group: bloodGroup, units: units, action: action})
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(`Updated! ${bloodGroup}: ${data.units_available} units (${data.status})`);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        alert('Network error');
+    }
+}
+</script>
+{% endblock %}

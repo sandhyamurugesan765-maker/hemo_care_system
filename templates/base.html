@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hemo Care Pro - {% block title %}Dashboard{% endblock %}</title>
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="Professional Blood Bank Management System">
+    
+    <!-- Favicon -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="page-wrapper">
+    <!-- Navigation -->
+    {% if session.get('user_id') %}
+    <nav class="navbar" id="navbar">
+        <div class="container navbar-container">
+            <!-- Brand Logo -->
+            <a href="{{ url_for('dashboard') }}" class="navbar-brand">
+                <div class="brand-logo">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title">Hemo Care</div>
+                    <div class="brand-subtitle">Blood Management System</div>
+                </div>
+            </a>
+
+            <!-- Main Navigation -->
+            <div class="nav-menu">
+                <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <a href="{{ url_for('add_donor') }}" class="nav-item {% if request.endpoint == 'add_donor' %}active{% endif %}">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Add Donor</span>
+                </a>
+                
+                <a href="{{ url_for('search_blood') }}" class="nav-item {% if request.endpoint == 'search_blood' %}active{% endif %}">
+                    <i class="fas fa-search"></i>
+                    <span>Search Blood</span>
+                </a>
+                
+                <a href="{{ url_for('inventory') }}" class="nav-item {% if request.endpoint == 'inventory' %}active{% endif %}">
+                    <i class="fas fa-warehouse"></i>
+                    <span>Inventory</span>
+                </a>
+                
+                <a href="{{ url_for('history') }}" class="nav-item {% if request.endpoint == 'history' %}active{% endif %}">
+                    <i class="fas fa-history"></i>
+                    <span>History</span>
+                </a>
+            </div>
+
+            <!-- User Menu -->
+            <div class="user-menu">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        {{ session.get('user_name', 'U')[0] }}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">{{ session.get('user_name', 'User') }}</div>
+                        <div class="user-role">{{ session.get('user_role', 'staff')|title }}</div>
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category in ['success', 'error', 'warning', 'info'] else 'info' }}">
+                            <i class="fas 
+                                {% if category == 'success' %}fa-check-circle
+                                {% elif category == 'error' %}fa-exclamation-circle
+                                {% elif category == 'warning' %}fa-exclamation-triangle
+                                {% else %}fa-info-circle
+                                {% endif %}"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Page Content -->
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    {% if session.get('user_id') %}
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <div class="footer-logo">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <h3 class="footer-title">Hemo Care System</h3>
+                    <p>Professional Blood Management System</p>
+                </div>
+
+                <div>
+                    <h3 class="footer-title">Quick Links</h3>
+                    <div class="footer-links">
+                        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                        <a href="{{ url_for('add_donor') }}">Add Donor</a>
+                        <a href="{{ url_for('inventory') }}">Inventory</a>
+                        <a href="{{ url_for('history') }}">History</a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="footer-title">Contact</h3>
+                    <div class="footer-links">
+                        <a><i class="fas fa-phone"></i> Emergency: 102</a>
+                        <a><i class="fas fa-envelope"></i> support@bloodbank.com</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 Hemo Care Blood Management System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    <script>
+    // Simple initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        // Update year in footer
+        const yearElement = document.querySelector('.footer-bottom p');
+        if (yearElement) {
+            const currentYear = new Date().getFullYear();
+            yearElement.innerHTML = yearElement.innerHTML.replace('2024', currentYear);
+        }
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (navbar && window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else if (navbar) {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+    
+</body>
+</html>

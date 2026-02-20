@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h2>500 - Server Error</h2>
+            <p>Something went wrong on our end. Please try again later.</p>
+        </div>
+        <div style="text-align: center;">
+            <a href="{{ url_for('dashboard' if session.user_id else 'login') }}" class="btn btn-primary">
+                <i class="fas fa-redo"></i> Try Again
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
